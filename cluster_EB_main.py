@@ -124,13 +124,9 @@ def make_features(trials_data):
     return mapped_data
 
 
-if __name__ == '__main__':
-    main()
-
-
 def main():
 
-    read_data = np.load('DAW_DATA_FOR_CLUSTER.npy').item()
+    read_data = np.load('data/DAW_DATA_FOR_CLUSTER.npy').item()
     keys = ['S2', 'R1', 'R2', 'Rw', 'best_R1']
 
     # THIS IS MAIN LOOP OVER different models or weighting params
@@ -154,10 +150,16 @@ def main():
     
         #Plot the hull
         plt.figure()
-        plot(hull[0:-1,0],hull[0:-1,1],title='empirical bound for w = %.2f' % w)
+        plt.plot(hull[0:-1,0],hull[0:-1,1])
+        #plt.plot(hull[0:-1,0],hull[0:-1,1],title='empirical bound for w = %.2f' % w)
 
-        ylabel('$I_{future}$')
-        xlabel('$I_{past}$')
-        legend()
+        #ylabel('$I_{future}$')
+        #xlabel('$I_{past}$')
+        #legend()
+        plt.savefig('test.pdf')
+
+
+if __name__ == '__main__':
+    main()
 
 
