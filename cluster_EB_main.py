@@ -137,8 +137,17 @@ def main():
         trials = np.vstack([subject[key] for key in keys])
         features = make_features(trials)
 
+
+        # Uncomment this for no sliding window
+        """
         Fpast = features[:-1]
         Ffuture = features[1:]
+        """
+
+        # TODO: Make Sliding Windows Here
+        window_size = 5
+        Fpast = get_new_features_sliding(features, window_size)
+        Ffuture = features[window_size:]
 
         i_p_emp,i_f_emp,beta,mi1,hx,hy = eb(Fpast, Ffuture, numbeta=10, maxbeta=1000)
 
