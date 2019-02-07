@@ -6,6 +6,8 @@ from scipy.stats import entropy
 
 from .utils import p_joint, mi_x1x2_c, compute_upper_bound
 
+import multiprocessing as mp
+
 
 def empirical_bottleneck(x,y,numuniquex=0,numuniquey=0,**kw):
     """ Compute an IB curve for two empirical sequences x and y"""
@@ -20,9 +22,51 @@ def empirical_bottleneck(x,y,numuniquex=0,numuniquey=0,**kw):
     # Return array of ipasts and ifutures for array of different values of beta - mi should correspond to the saturation point
     mi = mi_x1x2_c(py, px, pyx_c)
     return i_p,i_f,beta,mi,entropy(px,base=2),entropy(py,base=2)
-
-
-def IB(px,py,pyx_c,maxbeta=5,numbeta=30,iterations=100,restarts=3):
+    
+    
+def beta_iter(b,px,py,pyx_c,pm_size,restarts,iterations):
+    """
+    Function to run BA algorithm for values of beta (first attempt for parallel processing)
+    
+    b: value of beta
+    px: marginal probability distribution for the past
+    py: marginal distribution for the future
+    pyx_c: conditional distribution Pr(future|past)
+    pm_size: discrete size of the compression distribution
+    iterations: number of iterations to use to for the curve to converge for each value of beta
+    restarts: number of times the optimization procedure should be restarted (for each value of beta) from different random initial conditions.
+    
+    returns a list [ipast,ifuture] with values of ipast and ifuture computed for a particular value of beta b
+    """
+    candidates = []
+    for r in range(restarts):
+	    # initialize distribution for bottleneck variable
+	    pm = np.random.rand(pm_size)+1
+	    pm /= pm.sum()
+	    pym_c = np.random.rand(py.size,pm.size)+1 # Starting point for the algorithm
+	    pym_c /= pym_c.sum(axis=0)
+	    # iterate the BA algorithm
+	    for i in range(iterations):
+		    pmx_c, z = p_mx_c(pm,px,py,pyx_c,pym_c,b)
+		    pm = p_m(pmx_c,px)
+		    pym_c = p_ym_c(pm,px,py,pyx_c,pmx_c)
+		    if i>0 and np.allclose(pmx_c,pmx_c_old,rtol=1e-3,atol=1e-3):
+				# if the x->m mapping is not updating any more, we're at convergence and we can stop
+			    break
+		    pmx_c_old = pmx_c
+	    candidates.append({'past_info' : mi_x1x2_c(pm, px, pmx_c),
+						   'future_info' : mi_x1x2_c(py, pm, pym_c),
+						   'functional' : -np.log2(np.inner(z,px))})
+	# among the restarts, select the result that gives the minimum
+	# value for the functional we're actually minimizing (eq 29 in
+	# Tishby et al 2000).
+    selected_candidate = min(candidates, key=lambda c: c['functional'])
+    i_p = selected_candidate['past_info']
+    i_f = selected_candidate['future_info']
+    return [i_p,i_f,b]
+    
+    
+def IB(px,py,pyx_c,maxbeta=5,numbeta=30,iterations=100,restarts=3,parallel = False):
     """Compute an Information Bottleneck curve
 
     px: marginal probability distribution for the past
@@ -30,6 +74,7 @@ def IB(px,py,pyx_c,maxbeta=5,numbeta=30,iterations=100,restarts=3):
     maxbeta: the maximum value of beta to use to compute the curve
     iterations: number of iterations to use to for the curve to converge for each value of beta
     restarts: number of times the optimization procedure should be restarted (for each value of beta) from different random initial conditions.
+    parallel: If false, compute ipast and ifuture for beta serially, if an integer, number of cores that can be used for parallel processing
     
     return vectors of ipast and ifuture (ips and ifs respectively) for
     different values of beta (bs)
@@ -37,34 +82,45 @@ def IB(px,py,pyx_c,maxbeta=5,numbeta=30,iterations=100,restarts=3):
     """
     pm_size = px.size
     bs = np.linspace(0.01,maxbeta,numbeta) #value of beta
-    ips = np.zeros(bs.size)
-    ifs = np.zeros(bs.size)
-    for bi in range(bs.size):
-        candidates = []
-        for r in range(restarts):
-            # initialize distribution for bottleneck variable
-            pm = np.random.rand(pm_size)+1
-            pm /= pm.sum()
-            pym_c = np.random.rand(py.size,pm.size)+1 # Starting point for the algorithm
-            pym_c /= pym_c.sum(axis=0)
-            # iterate the BA algorithm
-            for i in range(iterations):
-                pmx_c, z = p_mx_c(pm,px,py,pyx_c,pym_c,bs[bi])
-                pm = p_m(pmx_c,px)
-                pym_c = p_ym_c(pm,px,py,pyx_c,pmx_c)
-                if i>0 and np.allclose(pmx_c,pmx_c_old):
-                    # if the x->m mapping is not updating any more, we're at convergence and we can stop
-                    break
-                pmx_c_old = pmx_c
-            candidates.append({'past_info' : mi_x1x2_c(pm, px, pmx_c),
-                               'future_info' : mi_x1x2_c(py, pm, pym_c),
-                               'functional' : -np.log2(np.inner(z,px))})
-        # among the restarts, select the result that gives the minimum
-        # value for the functional we're actually minimizing (eq 29 in
-        # Tishby et al 2000).
-        selected_candidate = min(candidates, key=lambda c: c['functional'])
-        ips[bi] = selected_candidate['past_info']
-        ifs[bi] = selected_candidate['future_info']
+    if parallel != False:
+        pool = mp.Pool(processes=parallel)
+        results = [pool.apply_async(beta_iter,args=(b,px,py,pyx_c,pm_size,restarts,iterations,)) for b in bs]
+        results = [p.get() for p in results]
+        ips = [x[0] for x in results]
+        ifs = [x[1] for x in results]
+        #Values of beta may not be sorted appropriately, code below sorts ipast and ifuture according to their corresponding value of beta, and in correct order
+        b_s = [x[2] for x in results]          
+        ips = [x for _, x in sorted(zip(b_s,ips))]
+        ifs = [x for _, x in sorted(zip(b_s,ifs))]
+    elif parallel == False:
+	    ips = np.zeros(bs.size)
+	    ifs = np.zeros(bs.size)
+	    for bi in range(bs.size):
+		    candidates = []
+		    for r in range(restarts):
+			    # initialize distribution for bottleneck variable
+			    pm = np.random.rand(pm_size)+1
+			    pm /= pm.sum()
+			    pym_c = np.random.rand(py.size,pm.size)+1 # Starting point for the algorithm
+			    pym_c /= pym_c.sum(axis=0)
+				# iterate the BA algorithm
+			    for i in range(iterations):
+				    pmx_c, z = p_mx_c(pm,px,py,pyx_c,pym_c,bs[bi])
+				    pm = p_m(pmx_c,px)
+				    pym_c = p_ym_c(pm,px,py,pyx_c,pmx_c)
+				    if i>0 and np.allclose(pmx_c,pmx_c_old,rtol=1e-3,atol=1e-3):
+						# if the x->m mapping is not updating any more, we're at convergence and we can stop
+					    break
+				    pmx_c_old = pmx_c
+			    candidates.append({'past_info' : mi_x1x2_c(pm, px, pmx_c),
+								   'future_info' : mi_x1x2_c(py, pm, pym_c),
+								   'functional' : -np.log2(np.inner(z,px))})
+			# among the restarts, select the result that gives the minimum
+			# value for the functional we're actually minimizing (eq 29 in
+			# Tishby et al 2000).
+		    selected_candidate = min(candidates, key=lambda c: c['functional'])
+		    ips[bi] = selected_candidate['past_info']
+		    ifs[bi] = selected_candidate['future_info']
     # restrict the returned values to those that, at each value of
     # beta, actually increase (for Ipast) and do not decrease (for
     # Ifuture) the information with respect to the previous value of

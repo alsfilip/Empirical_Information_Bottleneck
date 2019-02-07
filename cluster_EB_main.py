@@ -128,9 +128,9 @@ def main():
 
     read_data = np.load('data/DAW_DATA_FOR_CLUSTER.npy').item()
     keys = ['S2', 'R1', 'R2', 'Rw', 'best_R1']
+    parallel = False #AF: change this to an integer to specify the number of cores available
 
     # THIS IS MAIN LOOP OVER different models or weighting params
-
     for w in read_data:
         subject = read_data[w]
 
@@ -149,13 +149,16 @@ def main():
         Fpast = get_new_features_sliding(features, window_size)
         Ffuture = features[window_size:]
 
-        i_p_emp,i_f_emp,beta,mi1,hx,hy = eb(Fpast, Ffuture, numbeta=10, maxbeta=1000)
+        i_p_emp,i_f_emp,beta,mi1,hx,hy = eb(Fpast, Ffuture, numbeta=10, maxbeta=1000,parallel = parallel) #AF: parallel distributes the beta calculations across the number of specified cores
 
 
 
 
         points = np.stack([i_p_emp,i_f_emp],axis=1)
         hull = np.array(convex_hull(points))
+        
+        #AF: Function to save the computed points
+        np.save('./MBMF_bounds/Test_EIB_W_%2.f'%w,hull)
     
         #Plot the hull
         plt.figure()
