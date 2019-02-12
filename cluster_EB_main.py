@@ -6,7 +6,6 @@ sys.path.append('./predinfo')
 from embo.embo import empirical_bottleneck as eb
 import embo.utils
 import numpy as np
-from numba import jit
 from scipy import stats
 from scipy.stats import spearmanr, entropy
 
