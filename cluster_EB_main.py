@@ -130,12 +130,12 @@ def main():
     print('READING IN DATA\n')
     read_data = np.load('data/DAW_DATA_FOR_CLUSTER.npy').item()
     #keys = ['S2', 'R1', 'R2', 'Rw', 'best_R1']
-    keys = ['S2','R1','R2','Rw','best_R1'] #smaller size to test
+    keys = ['S2','R1','R2'] #smaller size to test
     parallel = 8 #AF: change this to an integer to specify the number of cores available
 
     # THIS IS MAIN LOOP OVER different models or weighting params
     print('COMPUTING BOUND')
-    for w in [0.0,1.0]:#read_data:
+    for w in read_data:
         print('Computing bound %f...'%w)
         subject = read_data[w]
 
