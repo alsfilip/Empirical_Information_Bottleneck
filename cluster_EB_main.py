@@ -127,8 +127,8 @@ def main():
 
     print('READING IN DATA\n')
     read_data = np.load('data/DAW_DATA_FOR_CLUSTER.npy').item()
-    #keys = ['S2', 'R1', 'R2', 'Rw', 'best_R1']
-    keys = ['S2','R1','R2'] #smaller size to test
+    keys = ['S2', 'R1', 'R2', 'Rw', 'best_R1']
+    #keys = ['S2','R1','R2'] #smaller size to test
     parallel = 16 #AF: change this to an integer to specify the number of cores available
 
     # THIS IS MAIN LOOP OVER different models or weighting params
@@ -153,7 +153,7 @@ def main():
         Ffuture = features[window_size:]
         """
 
-        i_p_emp,i_f_emp,beta,mi1,hx,hy = eb(Fpast, Ffuture, numbeta=100, maxbeta=1000,parallel = parallel) #AF: parallel distributes the beta calculations across the number of specified cores
+        i_p_emp,i_f_emp,beta,mi1,hx,hy = eb(Fpast, Ffuture, numbeta=2000, maxbeta=1000,parallel = parallel) #AF: parallel distributes the beta calculations across the number of specified cores
 
 
 
