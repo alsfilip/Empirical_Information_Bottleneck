@@ -169,8 +169,8 @@ def main():
         #Plot the hull
         plt.figure()
         #plt.plot(hull[0:-1,0],hull[0:-1,1],'-o')
-        plt.plot(hull[0:-1,0],hull[0:-1,1]'-')
-        plt.plot(hull[0:-1,0],hull[0:-1,1]'ok')
+        plt.plot(hull[0:-1,0],hull[0:-1,1],'-')
+        plt.plot(hull[0:-1,0],hull[0:-1,1],'ok')
         plt.title(empirical bound for w = %.2f' % w)
         plt.ylabel('$I_{future}$')
         plt.xlabel('$I_{past}$')
