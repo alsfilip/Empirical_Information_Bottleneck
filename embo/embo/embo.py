@@ -1,11 +1,7 @@
 from __future__ import division
-
 import numpy as np
-
 from scipy.stats import entropy
-
 from .utils import p_joint, mi_x1x2_c, compute_upper_bound
-
 import multiprocessing as mp
 
 
@@ -147,7 +143,9 @@ def p_mx_c(pm,px,py,pyx_c,pym_c,beta):
         for xi in range(px.size):
             pmx_c[mi,xi] = pm[mi] * np.exp(-beta * entropy(pyx_c[:,xi], pym_c[:,mi], base=2))
     z = pmx_c.sum(axis=0)
-    pmx_c /= z #Normalize 
+    pmx_c /= z #Normalize
+        
+    	
     return pmx_c, z
 
 

@@ -1,13 +1,10 @@
 import sys
-import csv
-import matplotlib.pyplot as plt
 sys.path.append('./embo')
 sys.path.append('./predinfo')
 from embo.embo import empirical_bottleneck as eb
 import embo.utils
 import numpy as np
-from scipy import stats
-from scipy.stats import spearmanr, entropy
+from matplotlib import pyplot as plt
 
 
 
@@ -128,8 +125,8 @@ def main():
     print('READING IN DATA\n')
     read_data = np.load('data/DAW_DATA_FOR_CLUSTER.npy').item()
     keys = ['S2', 'R1', 'R2', 'Rw', 'best_R1']
-    #keys = ['S2','R1','R2'] #smaller size to test
-    parallel = 16 #AF: change this to an integer to specify the number of cores available
+    #keys = ['S2','R1','R2','Rw'] #smaller size to test
+    parallel = 8 #AF: change this to an integer to specify the number of cores available - False if you don't want to use parallel processing
 
     # THIS IS MAIN LOOP OVER different models or weighting params
     print('COMPUTING BOUND')
@@ -153,7 +150,7 @@ def main():
         Ffuture = features[window_size:]
         """
 
-        i_p_emp,i_f_emp,beta,mi1,hx,hy = eb(Fpast, Ffuture, numbeta=2000, maxbeta=1000,parallel = parallel) #AF: parallel distributes the beta calculations across the number of specified cores
+        i_p_emp,i_f_emp,beta,mi1,hx,hy = eb(Fpast, Ffuture, numbeta=3000, maxbeta=2000,parallel = parallel) #AF: parallel distributes the beta calculations across the number of specified cores
 
 
 
@@ -165,15 +162,14 @@ def main():
         np.save('./MBMF_bounds/EIB_W_%f'%w,hull)
     
         #Plot the hull
-#         plt.figure()
-#         #plt.plot(hull[0:-1,0],hull[0:-1,1],'-o')
-#         plt.plot(hull[0:-1,0],hull[0:-1,1],'-')
-#         plt.plot(hull[0:-1,0],hull[0:-1,1],'ok')
-#         plt.title('empirical bound for w = %.2f' % w)
-#         plt.ylabel('$I_{future}$')
-#         plt.xlabel('$I_{past}$')
-#         plt.legend()
-#         plt.savefig('./BoundFigs/MBMF_EIB_W_%f.pdf'%w)
+        plt.figure()
+        #plt.plot(hull[0:-1,0],hull[0:-1,1],'-o')
+        plt.plot(hull[0:-1,0],hull[0:-1,1],'-')
+        plt.plot(hull[0:-1,0],hull[0:-1,1],'ok')
+        plt.title('empirical bound for w = %.2f' % w)
+        plt.ylabel('$I_{future}$')
+        plt.xlabel('$I_{past}$')
+        plt.savefig('./BoundFigs/MBMF_EIB_W_%f.pdf'%w)
     print('\nFINISHED')
 
 if __name__ == '__main__':
