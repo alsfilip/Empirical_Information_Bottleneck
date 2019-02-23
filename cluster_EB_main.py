@@ -5,6 +5,7 @@ from embo.embo import empirical_bottleneck as eb
 import embo.utils
 import numpy as np
 from matplotlib import pyplot as plt
+import time
 
 
 
@@ -130,6 +131,7 @@ def main():
 
     # THIS IS MAIN LOOP OVER different models or weighting params
     print('COMPUTING BOUND')
+    start = time.time()
     for w in read_data:
         print('Computing bound %f...'%w)
         subject = read_data[w]
@@ -170,6 +172,7 @@ def main():
 #         plt.ylabel('$I_{future}$')
 #         plt.xlabel('$I_{past}$')
 #         plt.savefig('./BoundFigs/MBMF_EIB_W_%f.pdf'%w)
+    print(time.time()-start)
     print('\nFINISHED')
 
 if __name__ == '__main__':
