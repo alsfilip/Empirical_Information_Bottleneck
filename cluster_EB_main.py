@@ -152,7 +152,7 @@ def main():
         Ffuture = features[window_size:]
         """
 
-        i_p_emp,i_f_emp,beta,mi,hx,hy = eb(Fpast, Ffuture, numbeta=100, maxbeta=.985,parallel = parallel) #AF: parallel distributes the beta calculations across the number of specified cores
+        i_p_emp,i_f_emp,beta,mi,hx,hy = eb(Fpast, Ffuture, numbeta=100, maxbeta=.984,parallel = parallel) #AF: parallel distributes the beta calculations across the number of specified cores
 
 
 
