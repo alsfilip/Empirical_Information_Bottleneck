@@ -132,7 +132,7 @@ def main():
     # THIS IS MAIN LOOP OVER different models or weighting params
     print('COMPUTING BOUND')
     start = time.time()
-    for w in read_data:
+    for w in [0.0,1.0]:#read_data:
         print('Computing bound %f...'%w)
         subject = read_data[w]
 
@@ -152,7 +152,7 @@ def main():
         Ffuture = features[window_size:]
         """
 
-        i_p_emp,i_f_emp,beta,mi,hx,hy = eb(Fpast, Ffuture, numbeta=100000, maxbeta=.981,parallel = parallel) #AF: parallel distributes the beta calculations across the number of specified cores
+        i_p_emp,i_f_emp,beta,mi,hx,hy = eb(Fpast, Ffuture, numbeta=200000, maxbeta=.981,parallel = parallel) #AF: parallel distributes the beta calculations across the number of specified cores
 
 
 
