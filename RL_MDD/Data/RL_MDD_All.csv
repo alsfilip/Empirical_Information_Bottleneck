@@ -1,4 +1,4 @@
-"","Subject","SubNum","Group","SubChoice","SubAction","RichFrac","Condition","RichFracChoice","Fractal1_Side","Fractal2_Side","Fractal_1_Rew","Fractal_2_Rew","TSCP","Reward"
+"Row Index","Subject","SubNum","Group","SubChoice","SubAction","RichFrac","Condition","RichFracChoice","Fractal1_Side","Fractal2_Side","Fractal_1_Rew","Fractal_2_Rew","TSCP","Reward"
 "1",1210,1,"MDD",2,2,1,"Reward",0,1,2,1,0,1,0
 "2",1210,1,"MDD",2,1,1,"Reward",0,2,1,0,0,2,0
 "3",1210,1,"MDD",1,1,1,"Reward",1,1,2,1,0,3,1
