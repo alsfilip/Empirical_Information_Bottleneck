@@ -167,7 +167,7 @@ def main():
     sub_dict = {}
     N = len(np.unique(agg_df['Subject']))
     for i,subject in enumerate(np.unique(agg_df['Subject'])):
-        if (i+1 < 51 ):
+        if (i+1 < 101 ):
             continue
         print('Subject # %s/%s' % (i+1, N))
         sub_dict[subject] = {}
@@ -180,7 +180,7 @@ def main():
         sub_dict[subject]['i_f'] = i_f
         sub_dict[subject]['saturation'] = saturation
         
-        np.save('Data/bounds_one_back_second_set.npy', sub_dict)
+        np.save('Data/bounds_one_back_third_set.npy', sub_dict)
     
 if __name__ == "__main__":
     main()
