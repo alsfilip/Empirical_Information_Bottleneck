@@ -146,7 +146,7 @@ def mi_per_subject(subject_data):
     Fpast = features[:-1]
     Ffuture = features[1:]
     #  >>>>THIS LINE TAKES A LONG TIME TO RUN   
-    i_p,i_f,beta,mi,hx,hy = eb(Fpast,Ffuture,numbeta=3000,maxbeta=50)
+    i_p,i_f,beta,mi,hx,hy = eb(Fpast,Ffuture,numbeta=3000,maxbeta=5, parallel=16)
     #  <<<<< THIS LINE TAKES A LONG TIME TO RUN 
     return (predInfo,i_p,i_f,mi)
 
