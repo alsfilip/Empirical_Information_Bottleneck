@@ -178,7 +178,7 @@ def main():
         sub_dict[subject]['i_f'] = i_f
         sub_dict[subject]['saturation'] = saturation
         
-    np.save('bounds_one_back.npy', sub_dict)
+        np.save('Data/bounds_one_back.npy', sub_dict)
     
 if __name__ == "__main__":
     main()
