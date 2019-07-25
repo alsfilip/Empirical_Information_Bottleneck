@@ -81,6 +81,7 @@ def IB(px,py,pyx_c,maxbeta=5,numbeta=30,iterations=100,restarts=3,parallel = Fal
     if parallel != False:
         pool = mp.Pool(processes=parallel)
         results = [pool.apply_async(beta_iter,args=(b,px,py,pyx_c,pm_size,restarts,iterations,)) for b in bs]
+        pool.close()
         results = [p.get() for p in results]
         ips = [x[0] for x in results]
         ifs = [x[1] for x in results]
